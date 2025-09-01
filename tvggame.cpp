@@ -894,7 +894,7 @@ struct ComboMgr
     }
 };
 
-struct ThorWar : tvgdemo::Demo
+struct ThorJanitor : tvgdemo::Demo
 {
     #define LIFE_CNT 3
     #define RESPAWN_LEVEL 100
@@ -931,7 +931,7 @@ struct ThorWar : tvgdemo::Demo
     size_t wipesCnt = LEVEL * 100;
     bool gameplay = true;
 
-    ~ThorWar()
+    ~ThorJanitor()
     {
         for (auto e : enemies) {
             delete(e);
@@ -1250,5 +1250,5 @@ int main(int argc, char** argv)
     SWIDTH = WIDTH * SCALE;
     SHEIGHT = HEIGHT * SCALE;
 
-    return tvgdemo::main(new ThorWar, argc, argv, false, SWIDTH, SHEIGHT, 4);
+    return tvgdemo::main(new ThorJanitor, argc, argv, false, SWIDTH, SHEIGHT, 4);
 }
