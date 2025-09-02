@@ -18,7 +18,7 @@ You pilot a Thor Cleaning Ship, sweeping the orbit clean by blasting away these 
   <strong><a href="https://youtu.be/jdnnzmtHy9k">Watch the full video!</a></strong>
 </p>
 
-# Build & Run
+## Build & Run
 This program is built on the ThorVG engine. Please refer to the [ThorVG repo](https://github.com/thorvg/thorvg) to install it first. The recommended build option is
 ```
 -Dloaders="svg,ttf,jpg"
@@ -29,18 +29,18 @@ $ make
 $ tvggame
 ```
 
-# Key Instruction
+## Key Instruction
 
 * **Arrow Key**: Movement
 * **A** : Shoot
 * **Esc** : Exit
 
-# Combo System
+## Combo System
 
 You earn cleaning points for every piece of space junk you clear away.
 Sweep away the same type of trash consecutively to trigger combo bonuses, multiplying your score for an even shinier cleanup!
 
-# Features
+## Features
 
 - Designed as a demo app to showcase the performance of the ThorVG engine.
 - Each enemy is composed of 86 particles, with up to ~300 enemies appearing on screen simultaneously.
@@ -49,6 +49,6 @@ Sweep away the same type of trash consecutively to trigger combo bonuses, multip
 - The player’s ship, missiles, and GUI texts feature real-time DropShadow effects, while zone outlines include real-time BlurEffects.
 - Runs fully stable at 120+ FPS with the Software Renderer on 2K resolution.
 
-# Authors
+## Authors
 
 * **[Hermet Park](https://github.com/hermet)**
