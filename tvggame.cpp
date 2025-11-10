@@ -930,6 +930,7 @@ struct ThorJanitor : tvgdemo::Demo
     size_t respawnTime = 1000 - (LEVEL * RESPAWN_LEVEL);
     size_t wipesCnt = LEVEL * 100;
     bool gameplay = true;
+    bool updatedWipes = true;
 
     ~ThorJanitor()
     {
@@ -995,6 +996,7 @@ struct ThorJanitor : tvgdemo::Demo
         gui.fps = tvg::Text::gen();
         gui.fps->font(FONT_NAME);
         gui.fps->size(25);
+        gui.fps->text("FPS: 0");
         gui.fps->translate(10, 10);
         gui.fps->fill(170, 255, 80);
         gui.fps->scale(SCALE);
@@ -1032,10 +1034,14 @@ struct ThorJanitor : tvgdemo::Demo
 
     void updateGUI(bool updateFPS)
     {
-        //update wipes count
         char buf[13];
-        snprintf(buf, sizeof(buf), "%ld Wipes", wipesCnt);
-        gui.wipes->text(buf);
+
+        //update wipes count
+        if (updatedWipes) {
+            snprintf(buf, sizeof(buf), "%ld Wipes", wipesCnt);
+            gui.wipes->text(buf);
+            updatedWipes = false;
+        }
         // update fps after a certan elapsed time, 
         // otherwise it's difficult to read if text is changed every frame.
         if (updateFPS) {
@@ -1122,6 +1128,7 @@ struct ThorJanitor : tvgdemo::Demo
 
             LEVEL = 0;
             wipesCnt = 0;
+            updatedWipes = true;
             respawnTime = 1000;
             Enemy::DURATION = 10000;
             player.pos = {float(SWIDTH)/2, float(SHEIGHT)/2};
@@ -1183,6 +1190,7 @@ struct ThorJanitor : tvgdemo::Demo
                 } else if (auto ret = e->update(elapsed, player.launcher, p2o, target)) {
                     if (ret == 2) {  //hit by missle
                         wipesCnt += combo.trigger(e->type, target, elapsed);
+                        updatedWipes = true;
                         destroy(e, player.direction, elapsed);
                         gamelevel();
                     }
