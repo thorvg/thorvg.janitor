@@ -29,9 +29,17 @@
 #include <chrono>
 #include <cstring>
 #include <thorvg.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#include <SDL.h>
+#include <SDL_syswm.h>
+#include <SDL_keycode.h>
+#else
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #include <SDL_keycode.h>
+#endif
 #ifdef _WIN32
     #include <windows.h>
     #ifndef PATH_MAX
@@ -227,11 +235,101 @@ struct Window
         return true;
     }
 
+#ifdef __EMSCRIPTEN__
+    // Emscripten main loop state
+    struct MainLoopState {
+        Window* window;
+        uint32_t ptime;
+        uint32_t tickCnt;
+        bool running;
+    };
+
+    static MainLoopState* mainLoopState;
+
+    static void emscripten_main_loop(void* arg) {
+        MainLoopState* state = (MainLoopState*)arg;
+        Window* w = state->window;
+
+        if (!state->running) {
+            emscripten_cancel_main_loop();
+            delete state;
+            mainLoopState = nullptr;
+            return;
+        }
+
+        SDL_Event event;
+
+        //SDL Event handling
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT: {
+                    state->running = false;
+                    return;
+                }
+                case SDL_KEYDOWN: {
+                    if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        state->running = false;
+                        return;
+                    }
+                    break;
+                }
+                case SDL_MOUSEBUTTONDOWN: {
+                    w->needDraw |= w->demo->clickdown(w->canvas, event.button.x, event.button.y);
+                    break;
+                }
+                case SDL_MOUSEBUTTONUP: {
+                    w->needDraw |= w->demo->clickup(w->canvas, event.button.x, event.button.y);
+                    break;
+                }
+                case SDL_MOUSEMOTION: {
+                    w->needDraw |= w->demo->motion(w->canvas, event.button.x, event.button.y);
+                    break;
+                }
+                case SDL_WINDOWEVENT: {
+                    if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                        w->width = event.window.data1;
+                        w->height = event.window.data2;
+                        w->needResize = true;
+                        w->needDraw = true;
+                    }
+                }
+            }
+        }
+
+        if (w->needResize) {
+            w->resize();
+            w->needResize = false;
+        }
+
+        if (state->tickCnt > 0) {
+            w->needDraw |= w->demo->update(w->canvas, w->demo->elapsed);
+        }
+
+        if (w->needDraw) {
+            if (w->draw()) w->refresh();
+            w->needDraw = false;
+        }
+
+        auto ctime = SDL_GetTicks();
+        w->demo->elapsed += (ctime - state->ptime);
+        state->tickCnt++;
+        state->ptime = ctime;
+
+        w->demo->fps = w->fps();
+    }
+#endif
+
     void show()
     {
         SDL_ShowWindow(window);
         refresh();
 
+#ifdef __EMSCRIPTEN__
+        //Emscripten main loop
+        mainLoopState = new MainLoopState{this, SDL_GetTicks(), 0, true};
+        demo->elapsed = 0;
+        emscripten_set_main_loop_arg(emscripten_main_loop, mainLoopState, 0, 1);
+#else
         //Mainloop
         SDL_Event event;
         auto running = true;
@@ -297,12 +395,17 @@ struct Window
 
             demo->fps = fps();
         }
+#endif
     }
 
     virtual void resize() {}
     virtual void refresh() {}
 };
 
+#ifdef __EMSCRIPTEN__
+// Initialize static member
+Window::MainLoopState* Window::mainLoopState = nullptr;
+#endif
 
 /************************************************************************/
 /* SwCanvas Window Code                                                 */

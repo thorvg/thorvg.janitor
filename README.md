@@ -19,6 +19,8 @@ You pilot a Thor Cleaning Ship, sweeping the orbit clean by blasting away these 
 </p>
 
 ## Build & Run
+
+### Native Build (Desktop)
 This program is built on the ThorVG engine. Please refer to the [ThorVG repo](https://github.com/thorvg/thorvg) to install it first. The recommended build option is
 ```
 -Dloaders="svg,ttf,jpg"
@@ -27,6 +29,31 @@ Afer that, try build and execute the ThorVG Janitor!
 ```
 $ make
 $ tvggame
+```
+
+### Web Build (WASM)
+To build and run the game in a web browser:
+
+1. **Setup Emscripten SDK** (if not already installed):
+We use Emscripten to compile. Please refer to the [ThorVG wiki](https://github.com/thorvg/thorvg/wiki/Web-Development#1-setup-emscripten) to setup Emscripten SDK.
+
+
+2. **Install WASM Static Library**
+To use ThorVG Janitor in the web environment, you need a static library of ThorVG built for WebAssembly. Follow the steps in [Generate WebAssembly Code](https://github.com/thorvg/thorvg/wiki/Web-Development#2-build-thorvg) to compile ThorVG as a WASM static library. Once the build is complete, make sure to install the generated WASM static library before building the game.
+
+```bash
+$ ninja -C build_wasm install
+```
+
+2. **Build the game**:
+```bash
+export EMSDK=~/path/to/emsdk
+./build_wasm.sh
+```
+
+3. **Run a local server**:
+```bash
+emrun tvggame.html
 ```
 
 ## Key Instruction
