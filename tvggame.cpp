@@ -941,9 +941,13 @@ struct ThorJanitor : tvgdemo::Demo
             delete(e);
         }
 
-        lives.flash->unref();
+        if (lives.flash) {
+            lives.flash->unref();
+        }
         for (int i = 0; i < LIFE_CNT; ++i) {
-            lives.icon[i]->unref();
+            if (lives.icon[i]) {
+                lives.icon[i]->unref();
+            }
         }
     }
 
