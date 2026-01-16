@@ -118,14 +118,14 @@ struct WarZone
         }
         auto c = 200 + rand() % 55;
         galaxy[i]->fill(c, c, c);
-        canvas->push(galaxy[i]);
+        canvas->add(galaxy[i]);
     }
 
     void init(Canvas* canvas)
     {
         auto halo = Picture::gen();
         halo->load((const char*)HALO_DATA, sizeof(HALO_DATA), "jpg");
-        canvas->push(halo);
+        canvas->add(halo);
 
         //generate stars
         for (int i = 0; i < GALAXY_LAYER; ++i) {
@@ -150,7 +150,7 @@ struct WarZone
                 grid->appendRect(x, min.y, lwidth, h());
                 grid->fill(50, 50, 125);
             }
-            model->push(grid);
+            model->add(grid);
         }
         i = 0;
         for (int y = min.y + dy; y < max.y; y += dy, ++i) {
@@ -162,48 +162,48 @@ struct WarZone
                 grid->appendRect(min.x, y, w(), lwidth);
                 grid->fill(50, 50, 125);
             }
-            model->push(grid);
+            model->add(grid);
         }
 
         Scene* wrapper;
 
         //ring border top
         wrapper = Scene::gen();
-        wrapper->push(SceneEffect::GaussianBlur, _S(10.0f), 2, 0, 30);
+        wrapper->add(SceneEffect::GaussianBlur, _S(10.0f), 2, 0, 30);
         auto top = Shape::gen();
         top->appendRect(min.x, min.y, w(), 10);
         top->fill(255, 100, 100);
-        wrapper->push(top);
-        model->push(wrapper);
+        wrapper->add(top);
+        model->add(wrapper);
 
         //ring border left
         wrapper = Scene::gen();
-        wrapper->push(SceneEffect::GaussianBlur, _S(10.0f), 1, 0, 30);
+        wrapper->add(SceneEffect::GaussianBlur, _S(10.0f), 1, 0, 30);
         auto left = Shape::gen();
         left->appendRect(min.x, min.y, 10, h());
         left->fill(0, 255, 255);
-        wrapper->push(left);
-        model->push(wrapper);
+        wrapper->add(left);
+        model->add(wrapper);
 
         //ring border right
         wrapper = Scene::gen();
-        wrapper->push(SceneEffect::GaussianBlur, _S(10.0f), 1, 0, 30);
+        wrapper->add(SceneEffect::GaussianBlur, _S(10.0f), 1, 0, 30);
         auto right = Shape::gen();
         right->appendRect(max.x - 5, min.y, 10, h());
         right->fill(170, 255, 170);
-        wrapper->push(right);
-        model->push(wrapper);
+        wrapper->add(right);
+        model->add(wrapper);
 
         //ring border bottom
         wrapper = Scene::gen();
-        wrapper->push(SceneEffect::GaussianBlur, _S(10.0f), 2, 0, 30);
+        wrapper->add(SceneEffect::GaussianBlur, _S(10.0f), 2, 0, 30);
         auto bottom = Shape::gen();
         bottom->appendRect(min.x, max.y, w(), 10);
         bottom->fill(255, 170, 255);
-        wrapper->push(bottom);
-        model->push(wrapper);
+        wrapper->add(bottom);
+        model->add(wrapper);
 
-        canvas->push(model);
+        canvas->add(model);
     }
 
     void shift(const Point& player)
@@ -263,19 +263,19 @@ struct Launcher
 
         auto model = Scene::gen();
         model->clip(clipper);
-        canvas->push(model);
+        canvas->add(model);
         this->clipper = clipper;
 
         for (int i = 0; i < MISSLE_MAX; ++i) {
             auto wrapper = Scene::gen();
-            wrapper->push(SceneEffect::DropShadow, 255, 255, 0, 255, 0.0f, 0.0f, _S(30), 30);
+            wrapper->add(SceneEffect::DropShadow, 255, 255, 0, 255, 0.0f, 0.0f, _S(30), 30);
             auto shape = Shape::gen();
             shape->appendCircle(_S(-20), -offset, _S(10), _S(70));
             shape->appendCircle(_S(20), -offset, _S(10), _S(70));
             shape->fill(255, 255, 170);
-            wrapper->push(shape);
+            wrapper->add(shape);
             missles.push_back({wrapper, });
-            model->push(wrapper);
+            model->add(wrapper);
         }
     }
 
@@ -350,12 +350,12 @@ struct Player
         shape->strokeFill(200, 200, 255);
 
         model = Scene::gen();
-        model->push(light);
-        model->push(shape);
+        model->add(light);
+        model->add(shape);
 
         model->translate(pos.x, pos.y);
         model->scale(SCALE);
-        canvas->push(model);
+        canvas->add(model);
 
         this->pos = pos;
     }
@@ -402,8 +402,8 @@ struct Player
         normalize(direction);
 
         launcher.update(pos, direction, dir, elapsed, shift, shoot);
-        model->push(SceneEffect::ClearAll);
-        model->push(SceneEffect::DropShadow, 200, 200, 255, 255, dir + 180.0f, _S(20.0f), _S(30), 30);
+        model->add(SceneEffect::Clear);
+        model->add(SceneEffect::DropShadow, 200, 200, 255, 255, dir + 180.0f, _S(20.0f), _S(30), 30);
         model->rotate(dir);
         model->translate(pos.x, pos.y);
     }
@@ -462,7 +462,7 @@ struct Enemy
         dir = {float(rand() % 360), float(rand() % (360 * MAX_ROTATION))};
         model->rotate(dir.from);
         model->translate(pos.from.x, pos.from.y);
-        elayer->push(model);
+        elayer->add(model);
     }
 
     virtual int update(uint32_t elapsed, Launcher& launcher, const Point& p2o, Point& target)
@@ -631,14 +631,14 @@ struct Explosion
         for (int i = 0; i < PARTICLE_NUM; ++i) {
             particle[i].shape = Shape::gen();
             particle[i].shape->appendRect(0, 0, _S(8.0f), _S(60.0f));
-            model->push(particle[i].shape);
+            model->add(particle[i].shape);
         }
 
         //flash particle
         for (int i = 0; i < PARTICLE_EXTRA; ++i) {
             flashes[i].shape = Shape::gen();
             flashes[i].shape->blend(BlendMethod::Add);
-            model->push(flashes[i].shape);
+            model->add(flashes[i].shape);
         }
     }
 
@@ -820,7 +820,7 @@ struct ComboMgr
             snprintf(buf, sizeof(buf), "%dx combo!", counter);
             text->text(buf);
             text->translate(pos.x, pos.y);
-            mgr->layer->push(text);
+            mgr->layer->add(text);
             time = (float)elapsed;
         }
 
@@ -855,7 +855,7 @@ struct ComboMgr
     void init(Canvas* canvas)
     {
         layer = Scene::gen();
-        canvas->push(layer);
+        canvas->add(layer);
         recycle.reserve(10);
     }
 
@@ -961,7 +961,7 @@ struct ThorJanitor : tvgdemo::Demo
 
         gc.elayer = elayer = Scene::gen();
         elayer->clip(clipper);
-        canvas->push(elayer);
+        canvas->add(elayer);
 
         combo.init(canvas);
 
@@ -976,19 +976,19 @@ struct ThorJanitor : tvgdemo::Demo
         Point size = {_S(150), _S(150)};
         lives.icon[0] = Scene::gen();
         lives.icon[0]->ref();
-        lives.icon[0]->push(SceneEffect::DropShadow, 170, 255, 80, 255, 0.0f, 0.0f, _S(15), 30);
+        lives.icon[0]->add(SceneEffect::DropShadow, 170, 255, 80, 255, 0.0f, 0.0f, _S(15), 30);
         auto pic = Picture::gen();
         pic->load(LIFE_ICON, strlen(LIFE_ICON), "svg");
         pic->size(size.x, size.y);
         lives.icon[0]->translate(0, SHEIGHT - size.y);
-        lives.icon[0]->push(pic);
-        canvas->push(lives.icon[0]);
+        lives.icon[0]->add(pic);
+        canvas->add(lives.icon[0]);
 
         for (int i = 1; i < LIFE_CNT; ++i) {
             lives.icon[i] = static_cast<Scene*>(lives.icon[0]->duplicate());
             lives.icon[i]->ref();
             lives.icon[i]->translate(size.x * i, SHEIGHT - size.y);            
-            canvas->push(lives.icon[i]);
+            canvas->add(lives.icon[i]);
         }
 
         //gui texts - fps
@@ -1000,11 +1000,11 @@ struct ThorJanitor : tvgdemo::Demo
         gui.fps->translate(10, 10);
         gui.fps->fill(170, 255, 80);
         gui.fps->scale(SCALE);
-        canvas->push(gui.fps);
+        canvas->add(gui.fps);
 
         //gui texts - wipes
         auto wrapper = tvg::Scene::gen();
-        wrapper->push(SceneEffect::DropShadow, 170, 255, 80, 255, 0.0f, 0.0f, _S(20), 30);
+        wrapper->add(SceneEffect::DropShadow, 170, 255, 80, 255, 0.0f, 0.0f, _S(20), 30);
         gui.wipes = tvg::Text::gen();
         gui.wipes->font(FONT_NAME);
         gui.wipes->size(50);
@@ -1013,8 +1013,8 @@ struct ThorJanitor : tvgdemo::Demo
         gui.wipes->translate(SWIDTH/2, 10);
         gui.wipes->align(0.5f, 0.0f);
         gui.wipes->scale(SCALE);
-        wrapper->push(gui.wipes);
-        canvas->push(wrapper);
+        wrapper->add(gui.wipes);
+        canvas->add(wrapper);
 
         //gui texts - level
         gui.lv = tvg::Text::gen();
@@ -1027,7 +1027,7 @@ struct ThorJanitor : tvgdemo::Demo
         char buf[30];
         snprintf(buf, sizeof(buf), "Level %ld", LEVEL + 1);
         gui.lv->text(buf);
-        canvas->push(gui.lv);
+        canvas->add(gui.lv);
 
         return true;
     }
@@ -1055,7 +1055,7 @@ struct ThorJanitor : tvgdemo::Demo
         auto exp = gc.get();
         exp->init(e->pos.cur, direction, e->color(), elapsed);
         explosions.push_back(exp);
-        elayer->push(exp->model);
+        elayer->add(exp->model);
     }
 
     void destroy(const Point& pos, uint32_t elapsed)
@@ -1063,7 +1063,7 @@ struct ThorJanitor : tvgdemo::Demo
         auto exp = gc.get();
         exp->init(pos, elapsed);
         explosions.push_back(exp);
-        elayer->push(exp->model);
+        elayer->add(exp->model);
     }
 
     void input(Canvas* canvas, uint32_t elapsed)
@@ -1106,7 +1106,7 @@ struct ThorJanitor : tvgdemo::Demo
             canvas->remove(lives.icon[lives.count]);
             lives.last = elapsed;
             lives.active = true;
-            canvas->push(lives.flash);
+            canvas->add(lives.flash);
         }
 
         for (auto& fire : player.launcher.missles) {
@@ -1136,7 +1136,7 @@ struct ThorJanitor : tvgdemo::Demo
 
             lives.count = LIFE_CNT;
             for (int i = 0; i < LIFE_CNT; i++) {
-                canvas->push(lives.icon[i]);
+                canvas->add(lives.icon[i]);
             }
 
             char buf[30];
