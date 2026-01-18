@@ -931,9 +931,12 @@ struct ThorJanitor : tvgdemo::Demo
     size_t wipesCnt = LEVEL * 100;
     bool gameplay = true;
     bool updatedWipes = true;
+    bool initialized = false;
 
     ~ThorJanitor()
     {
+        if (!initialized) return;
+
         for (auto e : enemies) {
             delete(e);
         }
@@ -1028,6 +1031,8 @@ struct ThorJanitor : tvgdemo::Demo
         snprintf(buf, sizeof(buf), "Level %ld", LEVEL + 1);
         gui.lv->text(buf);
         canvas->add(gui.lv);
+
+        initialized = true;
 
         return true;
     }
