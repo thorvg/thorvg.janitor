@@ -314,7 +314,7 @@ struct SwWindow : Window
     {
         if (!initialized) return;
 
-        window = SDL_CreateWindow("ThorWar Demo", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
+        window = SDL_CreateWindow("Thor Janitor Demo", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
 
         //Create a Canvas
         canvas = tvg::SwCanvas::gen(tvg::EngineOption(0));
