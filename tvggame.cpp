@@ -83,7 +83,8 @@ static float SCALE;             //scale factor
 static size_t SWIDTH, SHEIGHT;  //scaled resolution
 static size_t LEVEL = 4;        //game level (0 ~ 9)
 
-struct Tween {
+struct Tween
+{
     uint32_t at;
     float duration;
 };
@@ -316,12 +317,13 @@ struct Launcher
 struct Player
 {
     Launcher launcher;
-    Scene* model;
+    Animation* model;
     Point pos, ray, direction;
     float dir = 0.0f;
     float speed = 0.7f;
     float bound;
     bool shoot = false;
+    bool forwarded = false;
 
     void init(Canvas* canvas, const Point& pos, Shape* clipper)
     {
@@ -339,23 +341,13 @@ struct Player
             {0, -15}, {7, 0}, {25, -7}, {40, -30}, {30, 10}, {0, 30}, {-30, 10}, {-40, -30}, {-25, -7}, {-7, 0}
         };
 
-        auto light = Shape::gen();
-        light->appendCircle(0, 0, 95, 95);
-        light->fill(255, 255, 255, 17);
+        model = Animation::gen();
+        auto pic = model->picture();
+        pic->load("spaceship.json");
+        pic->origin(0.5f, 0.5f);
+        pic->scale(0.35f);
 
-        auto shape = Shape::gen();
-        shape->appendPath(cmds, 11, pts, 10);
-        shape->fill(255, 255, 255, 127);
-        shape->strokeWidth(8.0f);
-        shape->strokeFill(200, 200, 255);
-
-        model = Scene::gen();
-        model->add(light);
-        model->add(shape);
-
-        model->translate(pos.x, pos.y);
-        model->scale(SCALE);
-        canvas->add(model);
+        canvas->add(pic);
 
         this->pos = pos;
     }
@@ -383,6 +375,7 @@ struct Player
         }
 
         zone.shift(pos);
+        forwarded = true;
     }
 
     void left(float multiplier)
@@ -402,10 +395,14 @@ struct Player
         normalize(direction);
 
         launcher.update(pos, direction, dir, elapsed, shift, shoot);
-        model->add(SceneEffect::Clear);
-        model->add(SceneEffect::DropShadow, 200, 200, 255, 255, dir + 180.0f, _S(20.0f), _S(30), 30);
-        model->rotate(dir);
-        model->translate(pos.x, pos.y);
+
+        // trigger animation only if the spaceship is moving
+        auto progress = forwarded? model->totalFrame() * tvgdemo::progress(elapsed, model->duration()) : 0.0f;
+        model->frame(progress);
+        model->picture()->rotate(dir);
+        model->picture()->translate(pos.x, pos.y);
+
+        forwarded = false;
     }
 };
 
@@ -1119,7 +1116,7 @@ struct ThorJanitor : tvgdemo::Demo
             fire.inactivate();
         }
 
-        player.model->visible(false);
+        player.model->picture()->visible(false);
         tick.end = elapsed;
     }
 
@@ -1149,7 +1146,7 @@ struct ThorJanitor : tvgdemo::Demo
             gui.lv->text(buf);
         }
 
-        player.model->visible(true);
+        player.model->picture()->visible(true);
         gameplay = true;
         tick.end = elapsed;
         combo.type = -1;
